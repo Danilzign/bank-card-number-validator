@@ -26,7 +26,7 @@ func (h *Handler) createCard(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, map[string]interface{}{
-		"1id": id,
+		"id": id,
 	})
 
 }

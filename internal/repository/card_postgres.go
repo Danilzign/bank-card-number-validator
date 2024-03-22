@@ -94,14 +94,26 @@ func (r *CardPostgres) UpdateCard(cardId string, input validate.UpdateCardInput)
 		argId++
 	}
 
-	setQuery := strings.Join(setValues, ", ")
+	cardNumber := *input.Number
+	digitNumber, _ := strconv.Atoi(cardNumber)
 
-	query := fmt.Sprintf("UPDATE cards SET %s WHERE id=$%d", setQuery, argId)
-	args = append(args, cardId)
+	ok := luhn.Valid(digitNumber)
 
-	logrus.Debugf("updateQuery: %s", query)
-	logrus.Debugf("args: %s", args)
+	if ok {
+		setQuery := strings.Join(setValues, ", ")
 
-	_, err := r.db.Exec(query, args...)
-	return err
+		query := fmt.Sprintf("UPDATE cards SET %s WHERE id=$%d", setQuery, argId)
+		args = append(args, cardId)
+
+		logrus.Debugf("updateQuery: %s", query)
+		logrus.Debugf("args: %s", args)
+
+		_, err := r.db.Exec(query, args...)
+		return err
+
+	} else {
+		fmt.Errorf("card number is not valid")
+	}
+
+	return nil
 }
